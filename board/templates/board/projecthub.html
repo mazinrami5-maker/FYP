@@ -1,0 +1,277 @@
+
+<style>
+   
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.projecthubbox {
+    width: 1250px; 
+    height: 650px;              
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgb(255, 136, 0);
+    border: 1px solid #e0e0e0;
+          
+    border-radius: 10px;          
+    margin: 70px 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 30px 20px;  
+    flex-shrink: 0;
+    
+    position: relative; 
+    left: 0px; 
+}
+
+.wrapper {
+    display: flex;
+    gap: 10px; 
+    margin-top: 0px;
+    justify-content: flex-start;  
+    align-items: flex-start;  
+    overflow-x: auto;
+}
+
+.sidebar {
+    width: 150px;
+    background-color: #ffc66a;
+    padding: 20px ;
+    padding-top: 50px;
+    height: 7000;
+    
+}
+
+.sidebar a {
+    padding-top: 50px;
+    display: block;
+    margin-bottom: 30px;
+}
+
+.welcome{
+    position: relative;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: larger;
+    padding-left: 15px;
+    margin: 0;          
+}
+
+.date{
+    position: relative;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: small;
+    padding-left: 15px;
+    margin: 2px 0 0 0;
+    color: grey;
+    }
+
+    .dropbtn {
+    background-color: #dff2ff;
+    color: white;
+    padding: 10px 16px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 100px;
+    right: 100px;
+    
+  }
+  
+  .dropdown {
+   
+    position: relative; 
+    bottom: 30px;        
+    right: 1250px;
+    display: flex;            
+    align-items: center;      
+    gap: 10px;
+  }
+  
+  .dropbtn:hover{
+    background-color: #2980B9;
+  }
+  .dropdown-content {
+  
+    display: none;
+    position: absolute; /* absolute relative to .dropdown now */
+    top: 100%;           /* place right below the button/input */
+    left: 900px;            /* align to the right edge of .dropdown */
+    background-color: #f1f1f1;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 10px;
+}
+
+  
+  
+  .dropdown-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    
+  }
+  
+  .dropdown-content a:hover {
+    background-color: #ddd;
+  }
+  
+  .show {
+    display: block;
+  }
+
+  .title{
+    padding-top: 30px;
+    padding-left: 15px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: bold;
+    font-size: large;
+  }
+
+  .big-line {
+    border: none;
+    border-radius: 5px;
+    height: 4px;          
+    background-color: black;
+    margin: 20px 0;
+}
+.plus {
+    background: none;      
+    border: none;         
+    font-size: 20px;       
+    font-weight: bold;     
+    cursor: pointer;
+    color: #000;           
+    padding: 0;
+}
+.search {
+    flex: 1;                  
+    max-width: 900px;         
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 1000px;
+
+}
+
+
+.modal {
+  position: absolute;
+  left: 400px;
+ 
+ 
+  background: white;
+ 
+  width: 400px;
+  height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+
+
+
+  </style>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<i class="fa-utility fa-semibold fa-gear"></i>
+
+
+
+<div id="react-modal-root"></div>
+
+
+<div class = "wrapper">
+<div class="sidebar">
+    <a href="">
+        <i class="glyphicon glyphicon-th-large"></i> Project hub
+      </a>
+  
+      <a href="">
+        <i class="glyphicon glyphicon-calendar"></i> Calendar
+      </a>
+  
+      <a href="">
+        <i class="glyphicon glyphicon-bell"></i> Notifications
+      </a>
+
+        <a href="">
+            <i class="glyphicon glyphicon-cog"></i> Settings
+        </a>
+     
+   
+</div>
+
+<div class="projecthubbox">
+    <p class="welcome">Welcome, {{ request.user.username }}</p>
+    <p class= "date" ,id="datetime">
+        {% now "D d/m/y" %}
+
+    
+    <p class="title">Projects board <button class="plus" onclick="openModal()">+</button><p>
+        <hr class="big-line">
+    </p>
+
+</div>
+
+
+<div style="margin:50px;">
+    <div class="dropdown">
+        <input class ="search"type="text" placeholder="Search..">
+      <button onclick="toggleDropdown()" class="dropbtn">👤</button>
+      <div id="myDropdown" class="dropdown-content">
+        <a href="/profile/">view profile</a>
+        <a href="/login/">Change Account</a>
+        <a href="{% url 'logout' %}">log-out</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div id="modalOverlay" onclick="closeModal()"></div>
+<div id="projectModal" class="modal">
+  <h2>Create Project</h2>
+
+  <form>
+    <input type="text" placeholder="Project name" required>
+    <input type="date" placeholder="deadline" required>
+    <textarea placeholder="Description"></textarea>
+
+    <div class="modal-actions">
+      <button type="button" onclick="closeModal()">Cancel</button>
+      <button type="submit">Create</button>
+    </div>
+  </form>
+</div>
+
+ 
+  
+  <script>
+  function toggleDropdown() {
+    document.getElementById("myDropdown").classList.toggle("show");
+  }
+  window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+      var dropdowns = document.getElementsByClassName("dropdown-content");
+      for (var i = 0; i < dropdowns.length; i++) {
+        dropdowns[i].classList.remove('show');
+      }
+    }
+  }
+
+
+function openModal() {
+  document.getElementById("modalOverlay").style.display = "block";
+  document.getElementById("projectModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").style.display = "none";
+  document.getElementById("projectModal").style.display = "none";
+}
+
+
+  </script>
+  

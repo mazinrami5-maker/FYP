@@ -1,0 +1,87 @@
+{% extends "board/navbar.html" %}
+
+{% block content %}
+<style>
+.loginbox {
+    width: 500px; 
+    height: 550px;              
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgb(255, 136, 0);
+    border: 1px solid #e0e0e0;
+    margin: 70px auto;           
+    border-radius: 10px;          
+    text-align: center; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 30px 20px;          
+}
+
+
+.loginbox label {
+    display: block;
+    font-weight: 500;
+    text-align: left;          
+    color: #333333;
+}
+
+.fieldtype {
+    width: 100%;              
+    margin-bottom: 20px;       
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.loginbuttonsubmit {
+    width: 100%;              
+    padding: 12px;
+    border-radius: 5px;
+    background-color: black;
+    color: rgb(255, 254, 254);
+    font-weight: bold;
+  
+}
+
+.loginbuttonsubmit:hover {
+    background-color: blue; 
+}
+
+.registerlink{
+    text-align: left;
+    display: block;          
+    padding-top: 15px;
+    color:black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-decoration: none;
+}
+.registerlink:hover {
+    color: blue; 
+}
+</style>
+
+<div class="loginbox">
+
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Full name: </label><br>
+        <input class="fieldtype" type="text" name="full_name" required><br><br>
+
+        <label>Email: </label><br>
+        <input class="fieldtype" type="email" name="email" required><br><br>
+
+        <label>Username: </label><br>
+        <input class="fieldtype" type="text" name="username" required><br><br>
+
+        <label>Password: </label><br>
+        <input class="fieldtype" type="password" name="password" required><br><br>
+
+        <button class="loginbuttonsubmit" type="submit">Register</button>
+    </form>
+    
+    
+</div>
+
+{% endblock %}

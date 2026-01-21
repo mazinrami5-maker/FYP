@@ -1,0 +1,105 @@
+{% extends "board/navbar.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<style>
+    .box {
+    border: 2px solid #ffffff;  
+    padding: 20px;            
+    width: 400px; 
+    font-size: large;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    margin-left: 100px;   
+    color: black;
+
+
+}
+.button{
+    border: 2px solid #000000; 
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0);
+    color: #ffffff;
+    padding: 5px 10px;          
+    text-decoration: none;        
+    font-weight: bold;
+    margin-right: 10px;     
+ 
+}
+.header{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    text-align: left;
+  
+    margin-left: 100px; 
+    margin-bottom: 0px;  
+}
+
+.homeimage img{
+    display: flex;
+    width: 350px;
+    height: auto;
+    border: 1px solid black; 
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    gap: -50px;
+
+}
+
+.textarea{
+    display: flex;
+    flex-direction: column;        
+    max-width: 600px;                  
+}
+
+.all{
+    display: flex;             
+    align-items: flex-start;  
+    gap: 50px;                   
+    margin: 50px 100px;
+    align-items: center;
+}
+
+.button:hover{
+    background-color: blue;
+}
+.first{
+    width: 350px;
+    height: auto;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.second{
+    position: absolute;
+    width: 350px;       
+    height: auto;
+    top: 220px;          
+    left: 900px;         
+    border: 1px solid black;
+    border-radius: 5px;
+    z-index: 10;         
+}
+
+</style>
+{% load static %}
+<div class="all">
+<div class="text area">
+<h1 class = header>Project managment is key!</h1>
+<div class = box>
+<p>Manage your projects with ease.
+    Create projects, break them down into tasks, and track your progress using a simple drag-and-drop board.
+     </p>
+
+     <a href="/login/" class = button > login </a>
+     <a href="/register/" class = button> register </a>
+</div>
+</div>
+
+<div  class="homeimage">
+<img src="{% static 'board/images/image1.jpg' %}" alt="imagehome" class="first">
+<img src="{% static 'board/images/image2.jpg' %}" alt="imagehome2" class="second">
+</div>
+</div>
+{% endblock %}
