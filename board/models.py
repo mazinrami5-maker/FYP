@@ -6,10 +6,12 @@ from django.db import models
 
 
 class Project(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=100)
     description = models.TextField()
     deadline = models.DateField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
 class Column(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -20,4 +22,4 @@ class Task(models.Model):
     column = models.ForeignKey(Column, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    deadline = models.DateField()
+    deadline = models.DateField(null=True, blank=True)

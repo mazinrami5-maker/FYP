@@ -1,0 +1,41 @@
+
+<style>
+.sidebar {
+    width: 150px;
+    background-color: #ffc66a;
+    padding: 20px;
+    padding-top: 50px;
+    height: 100vh;
+
+    position: fixed; /* stay on the side */
+    top: 0;
+    left: 0;
+}
+
+
+.sidebar a {
+    padding-top: 50px;
+    display: block;
+    margin-bottom: 30px;
+}
+</style>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<i class="fa-utility fa-semibold fa-gear"></i>
+<div class="sidebar">
+    <a href="{% url 'projecthub' %}">
+        <i class="glyphicon glyphicon-th-large"></i> Project hub
+    </a>
+
+    <a href="">
+        <i class="glyphicon glyphicon-calendar"></i> Calendar
+    </a>
+
+    <a href="">
+        <i class="glyphicon glyphicon-bell"></i> Notifications
+    </a>
+
+    <a href="">
+        <i class="glyphicon glyphicon-cog"></i> Settings
+    </a>
+</div>

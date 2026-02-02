@@ -1,105 +1,98 @@
 {% extends "board/navbar.html" %}
-
-{% block title %}Home{% endblock %}
+{% load static %}
 
 {% block content %}
-
 <style>
-    .box {
-    border: 2px solid #ffffff;  
-    padding: 20px;            
-    width: 400px; 
-    font-size: large;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    margin-left: 100px;   
-    color: black;
+  body {
+    background: #f4f6f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-
-}
-.button{
-    border: 2px solid #000000; 
-    border-radius: 5px;
-    background-color: rgba(0, 0, 0);
-    color: #ffffff;
-    padding: 5px 10px;          
-    text-decoration: none;        
-    font-weight: bold;
-    margin-right: 10px;     
- 
-}
-.header{
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    text-align: left;
-  
-    margin-left: 100px; 
-    margin-bottom: 0px;  
+  .all {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin: 50px 0 50px 60px;
+  max-width: 1100px;
+  justify-content: flex-start;
 }
 
-.homeimage img{
-    display: flex;
-    width: 350px;
-    height: auto;
-    border: 1px solid black; 
-    border-radius: 5px;
-    justify-content: center;
-    align-items: center;
-    gap: -50px;
+  .header {
+    font-size: 46px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #222;
+    margin-left: 0;
+  }
 
-}
+  .box {
+    background: #ffffff;
+    padding: 30px;
+    width: 420px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(255, 136, 0, 0.35);
+    font-size: 17px;
+    line-height: 1.6;
+  }
 
-.textarea{
-    display: flex;
-    flex-direction: column;        
-    max-width: 600px;                  
-}
+  .box p {
+    margin-bottom: 25px;
+    color: #444;
+  }
 
-.all{
-    display: flex;             
-    align-items: flex-start;  
-    gap: 50px;                   
-    margin: 50px 100px;
-    align-items: center;
-}
+  .button {
+    display: inline-block;
+    background: #ff8800;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-right: 12px;
+  }
 
-.button:hover{
-    background-color: blue;
-}
-.first{
-    width: 350px;
-    height: auto;
-    border: 1px solid black;
-    border-radius: 5px;
-}
+  .button:hover {
+    background: #e67600;
+    transform: translateY(-1px);
+  }
 
-.second{
+  .homeimage {
+    position: relative;
+  }
+
+  .homeimage img {
+    width: 360px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0);
+  }
+
+  .second {
     position: absolute;
-    width: 350px;       
-    height: auto;
-    top: 220px;          
-    left: 900px;         
-    border: 1px solid black;
-    border-radius: 5px;
-    z-index: 10;         
-}
-
+    top: 160px;
+    left: 180px;
+    z-index: 5;
+  }
 </style>
-{% load static %}
+
 <div class="all">
-<div class="text area">
-<h1 class = header>Project managment is key!</h1>
-<div class = box>
-<p>Manage your projects with ease.
-    Create projects, break them down into tasks, and track your progress using a simple drag-and-drop board.
-     </p>
+  <div class="textarea">
+    <h1 class="header">Project management made simple</h1>
 
-     <a href="/login/" class = button > login </a>
-     <a href="/register/" class = button> register </a>
-</div>
-</div>
+    <div class="box">
+      <p>
+        Manage your projects with ease.
+        Create projects, break them into tasks,
+        and track progress with a clean drag-and-drop board.
+      </p>
 
-<div  class="homeimage">
-<img src="{% static 'board/images/image1.jpg' %}" alt="imagehome" class="first">
-<img src="{% static 'board/images/image2.jpg' %}" alt="imagehome2" class="second">
-</div>
+      <a href="/login/" class="button">Login</a>
+      <a href="/register/" class="button">Register</a>
+    </div>
+  </div>
+
+  <div class="homeimage">
+    <img src="{% static 'board/images/image1.jpg' %}" alt="Preview 1">
+    <img src="{% static 'board/images/image2.jpg' %}" alt="Preview 2" class="second">
+  </div>
 </div>
 {% endblock %}

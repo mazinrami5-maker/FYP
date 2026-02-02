@@ -1,0 +1,530 @@
+{% include "board/loginnavbar.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Board</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  </head>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    
+    .container h1 {
+      margin-bottom: 20px;
+      font-size: 50px;
+      font-weight: 600;
+      padding-left: 30px;
+    }
+    
+    
+    .columns {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    
+    .column {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgb(255, 136, 0);  
+      width: 100%;
+      min-width: 260px;
+      padding: 15px;
+
+    }
+    
+    .column-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .column-title h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+
+    .column-title button {
+      background: #ff8800;
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .column-title button:hover {
+      background: #e67600;
+    }
+
+    .projectline{
+    border: none;
+    border-radius: 5px;
+    height: 4px;          
+    background-color: black;
+    margin: 20px 0 0 20px;
+    
+    }
+
+    .task {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgb(255, 136, 0); 
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.task:hover {
+  background-color: #f9f9f9;
+}
+
+.tasks {
+  min-height: 50px;   
+  padding: 5px;
+
+}
+
+
+  .task-modal {
+    width: 400px;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  .task-modal label {
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+  }
+
+  .task-modal textarea, .task-modal input {
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+  }
+
+  .task-modal menu {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .task-modal button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background-color: #ff8800;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .task-modal button:hover {
+    background-color: #e67600;
+  }
+</style>
+
+
+    </style>
+  <body>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <div class="container">
+      <h1>{{ project.title }}</h1>
+        <hr class="projectline">
+    </p>
+    </div>
+
+    <div class="container columns">
+        {% for column in columns %}
+        <div class="column" data-column-id="{{ column.id }}">
+          <div class="column-title">
+            <h3 data-tasks="{{ column.tasks.count }}">{{ column.name }}</h3>
+            <button data-add><i class="bi bi-plus"></i></button>
+          </div>
+          <div class="tasks">
+            {% for task in column.tasks %}
+            <div class="task" draggable="true" data-task-id="{{ task.id }}">
+              <div class="task-content">{{ task.name }}</div>
+              <div class="task-actions">
+                <button data-edit><i class="bi bi-pencil-square"></i></button>
+                <button data-delete><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+
+    <dialog class="confirm-modal">
+      <form method="dialog">
+        <h3>Delete Task?</h3>
+        <p>You are about to delete the ff. task</p>
+        <div class="preview"></div>
+
+        <menu>
+          <button type="button" id="cancel">Cancel</button>
+          <button type="submit" id="confirm">Yes, delete it.</button>
+        </menu>
+      </form>
+    </dialog>
+    </footer>
+
+    <dialog id="task-modal" class="task-modal">
+        <form method="dialog" class="modal-form">
+          <h2 id="modal-title">Task Title</h2>
+          
+          <label for="modal-desc">Description:</label>
+          <textarea id="modal-desc" rows="4" style="width: 100%;"></textarea>
+          
+          <label for="modal-deadline">Deadline:</label>
+          <input type="date" id="modal-deadline" style="width: 100%; margin-bottom: 15px;" />
+      
+          <menu>
+            <button type="button" id="modal-close">Close</button>
+            <button type="submit">Save</button>
+          </menu>
+        </form>
+      </dialog>
+      
+      
+  </body>
+</html>
+<script>
+    const PROJECT_ID = "{{ project.id }}";
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById("task-modal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalDesc = document.getElementById("modal-desc");
+      const modalClose = document.getElementById("modal-close");
+    
+      const openTaskModal = (taskElement) => {
+        const taskId = taskElement.dataset.taskId;
+        const taskName = taskElement.querySelector(".task-content").innerText;
+        modalTitle.innerText = taskName;
+        modalDesc.innerText = `Details for task would go here.`;
+    
+        modal.showModal(); 
+      };
+    
+ 
+      modalClose.addEventListener("click", () => {
+        modal.close();
+      });
+    
+      const tasks = document.querySelectorAll(".task");
+      tasks.forEach(task => {
+        task.addEventListener("click", () => openTaskModal(task));
+      });
+    });
+   
+    function getCSRFToken() {
+      const name = "csrftoken";
+      const cookies = document.cookie.split(";");
+    
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          return cookie.substring(name.length + 1);
+        }
+      }
+      return "";
+    }
+</script>
+    
+  
+<script>
+   
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        
+
+        const modal = document.querySelector(".confirm-modal");
+        const columnsContainer = document.querySelector(".columns");
+        const columns = columnsContainer.querySelectorAll(".column");
+
+        let currentTask = null;
+        const handleDragover = (event) => {
+  event.preventDefault();
+  const draggedTask = document.querySelector(".dragging");
+  const target = event.target.closest(".task, .tasks");
+
+  if (!target || target === draggedTask) return;
+
+  if (target.classList.contains("tasks")) {
+    const lastTask = target.lastElementChild;
+    if (!lastTask) {
+      target.appendChild(draggedTask);
+    } else {
+      const { bottom } = lastTask.getBoundingClientRect();
+      event.clientY > bottom && target.appendChild(draggedTask);
+    }
+  } else {
+    const { top, height } = target.getBoundingClientRect();
+    const distance = top + height / 2;
+
+    if (event.clientY < distance) {
+      target.before(draggedTask);
+    } else {
+      target.after(draggedTask);
+    }
+  }
+};
+
+
+const handleDrop = (event) => {
+  event.preventDefault();
+  const draggedTask = document.querySelector(".dragging");
+  if (!draggedTask) return;
+
+  const newColumn = draggedTask.closest(".column");
+  const newColumnId = newColumn.dataset.columnId;
+  const taskId = draggedTask.dataset.taskId;
+
+  
+  if (taskId) {
+    fetch(`/kanban/${PROJECT_ID}/move_task/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        task_id: taskId,
+        new_column_id: newColumnId,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) alert("Failed to move task on server");
+    });
+  }
+};
+
+
+
+
+const handleDragend = (event) => {
+  event.target.classList.remove("dragging");
+};
+
+const handleDragstart = (event) => {
+  const task = event.target;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", "");
+  requestAnimationFrame(() => task.classList.add("dragging"));
+};
+
+
+const allTasks = document.querySelectorAll(".task");
+allTasks.forEach(task => {
+  task.addEventListener("dragstart", handleDragstart);
+  task.addEventListener("dragend", handleDragend);
+});
+
+
+
+const handleBlur = (event) => {
+  const input = event.target;
+  const text = input.innerText.trim();
+  const taskId = input.dataset.taskId;
+
+
+  if (!text) {
+    input.remove();
+    return;
+  }
+
+  const column = input.closest(".column");
+  const columnId = column.dataset.columnId;
+
+ 
+  const task = document.createElement("div");
+  task.className = "task";
+  task.draggable = true;
+
+  task.addEventListener("dragstart", handleDragstart);
+  task.addEventListener("dragend", handleDragend);
+
+  task.innerHTML = `
+    <div class="task-content">${text}</div>
+    <div class="task-actions">
+      <button data-edit>
+        <i class="bi bi-pencil-square"></i>
+      </button>
+      <button data-delete>
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  `;
+
+  input.replaceWith(task);
+
+  if (taskId) {
+    task.dataset.taskId = taskId;
+
+    fetch(`/kanban/${PROJECT_ID}/update_task/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        task_id: taskId,
+        name: text,
+      }),
+    });
+
+  } else {
+    fetch(`/kanban/${PROJECT_ID}/add_task/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: text,
+        column_id: columnId,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      task.dataset.taskId = data.id;
+    });
+  }
+};
+
+const handleDelete = (event) => {
+  const task = event.target.closest(".task");
+  if (!task) return;
+
+  const taskId = task.dataset.taskId;
+  if (!taskId) return;
+
+  if (!confirm("Delete this task?")) return;
+
+  fetch(`/kanban/${PROJECT_ID}/delete_task/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCSRFToken(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ task_id: taskId }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        task.remove(); 
+      }
+    });
+};
+
+
+const handleEdit = (event) => {
+  const task = event.target.closest(".task");
+  const text = task.querySelector(".task-content").innerText;
+  const input = createTaskInput(text);
+
+ 
+  input.dataset.taskId = task.dataset.taskId;
+
+  task.replaceWith(input);
+  input.focus();
+};
+
+
+    
+const handleAdd = (event) => {
+        const column = event.target.closest(".column");
+        if (!column) return;
+    
+        const tasks = column.querySelector(".tasks");
+        const input = createTaskInput();
+    
+        tasks.appendChild(input);
+        input.focus();
+      };
+
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("[data-add]")) {
+          handleAdd(event);
+        }
+        else if (event.target.closest("[data-edit]")) {
+          handleEdit(event);
+        }
+        else if (event.target.closest("[data-delete]")) {
+    handleDelete(event);
+  }
+      });
+
+
+        tasksElements = columnsContainer.querySelectorAll(".tasks");
+        for (const tasksEl of tasksElements) {
+        tasksEl.addEventListener("dragover", handleDragover);
+        tasksEl.addEventListener("drop", handleDrop);
+        }
+
+
+    
+    
+      const createTaskInput = (text = "") => {
+        const input = document.createElement("div");
+        input.className = "task-input";
+        input.contentEditable = true;
+        input.dataset.placeholder = "Task name";
+        input.addEventListener("blur", handleBlur);
+        return input;
+      };
+    
+  
+      
+    
+    });
+
+   
+
+
+
+    </script>
+    
+
+ 
+
+{% endblock %}
