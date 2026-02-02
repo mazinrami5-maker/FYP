@@ -11,8 +11,7 @@ from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-
-
+#views
 
 
 def home(request):
