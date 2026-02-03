@@ -114,7 +114,7 @@
     border-radius: 10px;
     padding: 20px;
     border: 1px solid #ccc;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0,0,0);
   }
 
   .task-modal label {
@@ -224,40 +224,22 @@
   </body>
 </html>
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
     const PROJECT_ID = "{{ project.id }}";
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const modal = document.getElementById("task-modal");
-      const modalTitle = document.getElementById("modal-title");
-      const modalDesc = document.getElementById("modal-desc");
-      const modalClose = document.getElementById("modal-close");
     
-      const openTaskModal = (taskElement) => {
-        const taskId = taskElement.dataset.taskId;
-        const taskName = taskElement.querySelector(".task-content").innerText;
-        modalTitle.innerText = taskName;
-        modalDesc.innerText = `Details for task would go here.`;
-    
-        modal.showModal(); 
-      };
-    
- 
-      modalClose.addEventListener("click", () => {
-        modal.close();
-      });
-    
-      const tasks = document.querySelectorAll(".task");
-      tasks.forEach(task => {
-        task.addEventListener("click", () => openTaskModal(task));
-      });
-    });
-   
+    const taskModal = document.getElementById("task-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalDesc = document.getElementById("modal-desc");
+    const modalClose = document.getElementById("modal-close");
+  
+    const confirmModal = document.querySelector(".confirm-modal");
+    const confirmBtn = confirmModal.querySelector("#confirm");
+    const cancelBtn = confirmModal.querySelector("#cancel");
+  
+  
     function getCSRFToken() {
       const name = "csrftoken";
       const cookies = document.cookie.split(";");
-    
       for (let cookie of cookies) {
         cookie = cookie.trim();
         if (cookie.startsWith(name + "=")) {
@@ -266,265 +248,198 @@
       }
       return "";
     }
-</script>
-    
   
-<script>
-   
 
-
-    document.addEventListener("DOMContentLoaded", () => {
-        
-
-        const modal = document.querySelector(".confirm-modal");
-        const columnsContainer = document.querySelector(".columns");
-        const columns = columnsContainer.querySelectorAll(".column");
-
-        let currentTask = null;
-        const handleDragover = (event) => {
-  event.preventDefault();
-  const draggedTask = document.querySelector(".dragging");
-  const target = event.target.closest(".task, .tasks");
-
-  if (!target || target === draggedTask) return;
-
-  if (target.classList.contains("tasks")) {
-    const lastTask = target.lastElementChild;
-    if (!lastTask) {
-      target.appendChild(draggedTask);
-    } else {
-      const { bottom } = lastTask.getBoundingClientRect();
-      event.clientY > bottom && target.appendChild(draggedTask);
-    }
-  } else {
-    const { top, height } = target.getBoundingClientRect();
-    const distance = top + height / 2;
-
-    if (event.clientY < distance) {
-      target.before(draggedTask);
-    } else {
-      target.after(draggedTask);
-    }
-  }
-};
-
-
-const handleDrop = (event) => {
-  event.preventDefault();
-  const draggedTask = document.querySelector(".dragging");
-  if (!draggedTask) return;
-
-  const newColumn = draggedTask.closest(".column");
-  const newColumnId = newColumn.dataset.columnId;
-  const taskId = draggedTask.dataset.taskId;
-
+    const openTaskModal = (taskEl) => {
+      const taskId = taskEl.dataset.taskId;
+      modalTitle.innerText = taskEl.querySelector(".task-content").innerText;
+      modalDesc.value = taskEl.dataset.description || "";
+      taskModal.dataset.taskId = taskId;
+      taskModal.showModal();
+    };
   
-  if (taskId) {
-    fetch(`/kanban/${PROJECT_ID}/move_task/`, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        task_id: taskId,
-        new_column_id: newColumnId,
-      }),
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) alert("Failed to move task on server");
+    modalClose.addEventListener("click", () => taskModal.close());
+  
+    taskModal.querySelector("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const taskId = taskModal.dataset.taskId;
+      const updatedDesc = modalDesc.value;
+  
+      fetch(`/kanban/${PROJECT_ID}/update_task/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task_id: taskId, description: updatedDesc }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const taskEl = document.querySelector(`.task[data-task-id="${taskId}"]`);
+            if (taskEl) taskEl.dataset.description = updatedDesc;
+            taskModal.close();
+          }
+        });
     });
-  }
-};
+  
 
+    const createTaskInput = (text = "", taskId = null) => {
+      const input = document.createElement("div");
+      input.className = "task-input";
+      input.contentEditable = true;
+      input.dataset.placeholder = "Task name";
+      if (taskId) input.dataset.taskId = taskId;
+      input.innerText = text;
+  
+      input.addEventListener("blur", () => {
+        const name = input.innerText.trim();
+        if (!name) return input.remove();
+  
+        const column = input.closest(".column");
+        const columnId = column.dataset.columnId;
+  
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task";
+        taskDiv.draggable = true;
+        taskDiv.innerHTML = `
+          <div class="task-content">${name}</div>
+          <div class="task-actions">
+            <button data-edit><i class="bi bi-pencil-square"></i></button>
+            <button data-delete><i class="bi bi-trash"></i></button>
+          </div>
+        `;
+  
+        taskDiv.addEventListener("dragstart", handleDragstart);
+        taskDiv.addEventListener("dragend", handleDragend);
+  
+        input.replaceWith(taskDiv);
+  
+        if (taskId) {
+          fetch(`/kanban/${PROJECT_ID}/update_task/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCSRFToken(),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ task_id: taskId, name }),
+          });
+        } else {
+          fetch(`/kanban/${PROJECT_ID}/add_task/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCSRFToken(),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, column_id: columnId }),
+          })
+            .then(res => res.json())
+            .then(data => taskDiv.dataset.taskId = data.id);
+        }
+      });
+  
+      return input;
+    };
+  
 
+    const handleDragstart = (e) => {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", "");
+      e.target.classList.add("dragging");
+    };
+    const handleDragend = (e) => e.target.classList.remove("dragging");
+  
+    const handleDragover = (e) => {
+      e.preventDefault();
+      const dragged = document.querySelector(".dragging");
+      const target = e.target.closest(".task, .tasks");
+      if (!target || target === dragged) return;
+  
+      if (target.classList.contains("tasks")) {
+        target.appendChild(dragged);
+      } else {
+        const { top, height } = target.getBoundingClientRect();
+        const mid = top + height / 2;
+        e.clientY < mid ? target.before(dragged) : target.after(dragged);
+      }
+    };
+  
+    const handleDrop = (e) => {
+      e.preventDefault();
+      const dragged = document.querySelector(".dragging");
+      if (!dragged) return;
+  
+      const newColumn = dragged.closest(".column");
+      const taskId = dragged.dataset.taskId;
+      const newColumnId = newColumn.dataset.columnId;
+  
+      fetch(`/kanban/${PROJECT_ID}/move_task/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task_id: taskId, new_column_id: newColumnId }),
+      });
+    };
+  
 
-
-const handleDragend = (event) => {
-  event.target.classList.remove("dragging");
-};
-
-const handleDragstart = (event) => {
-  const task = event.target;
-  event.dataTransfer.effectAllowed = "move";
-  event.dataTransfer.setData("text/plain", "");
-  requestAnimationFrame(() => task.classList.add("dragging"));
-};
-
-
-const allTasks = document.querySelectorAll(".task");
-allTasks.forEach(task => {
-  task.addEventListener("dragstart", handleDragstart);
-  task.addEventListener("dragend", handleDragend);
-});
-
-
-
-const handleBlur = (event) => {
-  const input = event.target;
-  const text = input.innerText.trim();
-  const taskId = input.dataset.taskId;
-
-
-  if (!text) {
-    input.remove();
-    return;
-  }
-
-  const column = input.closest(".column");
-  const columnId = column.dataset.columnId;
-
- 
-  const task = document.createElement("div");
-  task.className = "task";
-  task.draggable = true;
-
-  task.addEventListener("dragstart", handleDragstart);
-  task.addEventListener("dragend", handleDragend);
-
-  task.innerHTML = `
-    <div class="task-content">${text}</div>
-    <div class="task-actions">
-      <button data-edit>
-        <i class="bi bi-pencil-square"></i>
-      </button>
-      <button data-delete>
-        <i class="bi bi-trash"></i>
-      </button>
-    </div>
-  `;
-
-  input.replaceWith(task);
-
-  if (taskId) {
-    task.dataset.taskId = taskId;
-
-    fetch(`/kanban/${PROJECT_ID}/update_task/`, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        task_id: taskId,
-        name: text,
-      }),
-    });
-
-  } else {
-    fetch(`/kanban/${PROJECT_ID}/add_task/`, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: text,
-        column_id: columnId,
-      }),
-    })
-    .then(res => res.json())
-    .then(data => {
-      task.dataset.taskId = data.id;
-    });
-  }
-};
-
-const handleDelete = (event) => {
-  const task = event.target.closest(".task");
-  if (!task) return;
-
-  const taskId = task.dataset.taskId;
-  if (!taskId) return;
-
-  if (!confirm("Delete this task?")) return;
-
-  fetch(`/kanban/${PROJECT_ID}/delete_task/`, {
-    method: "POST",
-    headers: {
-      "X-CSRFToken": getCSRFToken(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ task_id: taskId }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        task.remove(); 
+    document.addEventListener("click", (e) => {
+      const taskEl = e.target.closest(".task");
+      if (!taskEl) return;
+  
+      if (e.target.closest("[data-edit]")) {
+        const text = taskEl.querySelector(".task-content").innerText;
+        const input = createTaskInput(text, taskEl.dataset.taskId);
+        taskEl.replaceWith(input);
+        input.focus();
+      } else if (e.target.closest("[data-delete]")) {
+        confirmModal.querySelector(".preview").innerText = taskEl.querySelector(".task-content").innerText;
+        confirmModal.showModal();
+  
+        confirmBtn.onclick = () => {
+          fetch(`/kanban/${PROJECT_ID}/delete_task/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCSRFToken(),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ task_id: taskEl.dataset.taskId }),
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) taskEl.remove();
+            });
+          confirmModal.close();
+        };
+  
+        cancelBtn.onclick = () => confirmModal.close();
+      } else {
+        openTaskModal(taskEl);
       }
     });
-};
-
-
-const handleEdit = (event) => {
-  const task = event.target.closest(".task");
-  const text = task.querySelector(".task-content").innerText;
-  const input = createTaskInput(text);
-
- 
-  input.dataset.taskId = task.dataset.taskId;
-
-  task.replaceWith(input);
-  input.focus();
-};
-
-
-    
-const handleAdd = (event) => {
-        const column = event.target.closest(".column");
-        if (!column) return;
-    
-        const tasks = column.querySelector(".tasks");
-        const input = createTaskInput();
-    
-        tasks.appendChild(input);
-        input.focus();
-      };
-
-      document.addEventListener("click", (event) => {
-        if (event.target.closest("[data-add]")) {
-          handleAdd(event);
-        }
-        else if (event.target.closest("[data-edit]")) {
-          handleEdit(event);
-        }
-        else if (event.target.closest("[data-delete]")) {
-    handleDelete(event);
-  }
-      });
-
-
-        tasksElements = columnsContainer.querySelectorAll(".tasks");
-        for (const tasksEl of tasksElements) {
-        tasksEl.addEventListener("dragover", handleDragover);
-        tasksEl.addEventListener("drop", handleDrop);
-        }
-
-
-    
-    
-      const createTaskInput = (text = "") => {
-        const input = document.createElement("div");
-        input.className = "task-input";
-        input.contentEditable = true;
-        input.dataset.placeholder = "Task name";
-        input.addEventListener("blur", handleBlur);
-        return input;
-      };
-    
   
-      
-    
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("[data-add]")) return;
+      const column = e.target.closest(".column");
+      const tasksContainer = column.querySelector(".tasks");
+      const input = createTaskInput();
+      tasksContainer.appendChild(input);
+      input.focus();
     });
+  
 
-   
-
-
-
-    </script>
-    
-
- 
-
+    document.querySelectorAll(".tasks").forEach(tasksEl => {
+      tasksEl.addEventListener("dragover", handleDragover);
+      tasksEl.addEventListener("drop", handleDrop);
+    });
+  
+    document.querySelectorAll(".task").forEach(task => {
+      task.addEventListener("dragstart", handleDragstart);
+      task.addEventListener("dragend", handleDragend);
+    });
+  });
+  </script>
+  
 {% endblock %}

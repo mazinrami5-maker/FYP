@@ -170,18 +170,7 @@ def move_task(request, project_id):
         task.column = new_column
         task.save()
          
-        
 
-
-@require_POST
-def update_task(request, project_id):
-    data = json.loads(request.body)
-
-    task_id = data.get("task_id")
-    name = data.get("name")
-    task = Task.objects.get(id=task_id)
-    task.name = name
-    task.save()
 
 
 @require_POST
@@ -198,5 +187,29 @@ def delete_task(request, project_id):
         return JsonResponse({"success": True})
 
         
+@require_POST
+def update_task_name(request, project_id):
+    data = json.loads(request.body)
+    task_id = data.get("task_id")
+    name = data.get("name")
+    task = Task.objects.get(id=task_id)
+    task.name = name
+    task.save()
+    return JsonResponse({"success": True})
+
+
+@login_required
+def update_task_details(request, task_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        task = get_object_or_404(Task, id=task_id)
+        task.description = data.get("description", "")
+        task.deadline = data.get("deadline") or None
+        task.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False}, status=400)
+
+
+
 
 
