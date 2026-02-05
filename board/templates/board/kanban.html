@@ -227,6 +227,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     const PROJECT_ID = "{{ project.id }}";
     
+    //modal for the tasks
     const taskModal = document.getElementById("task-modal");
     const modalTitle = document.getElementById("modal-title");
     const modalDesc = document.getElementById("modal-desc");
@@ -237,6 +238,7 @@
     const cancelBtn = confirmModal.querySelector("#cancel");
   
   
+    //reads the CSRF tokens
     function getCSRFToken() {
       const name = "csrftoken";
       const cookies = document.cookie.split(";");
@@ -249,7 +251,7 @@
       return "";
     }
   
-
+    //function for modal
     const openTaskModal = (taskEl) => {
       const taskId = taskEl.dataset.taskId;
       modalTitle.innerText = taskEl.querySelector(".task-content").innerText;
@@ -258,7 +260,10 @@
       taskModal.showModal();
     };
   
+    //close tasks
     modalClose.addEventListener("click", () => taskModal.close());
+
+    // used to update the tasks
   
     taskModal.querySelector("form").addEventListener("submit", (e) => {
       e.preventDefault();
@@ -283,7 +288,7 @@
         });
     });
   
-
+//create/edit the tasks
     const createTaskInput = (text = "", taskId = null) => {
       const input = document.createElement("div");
       input.className = "task-input";
@@ -341,7 +346,7 @@
       return input;
     };
   
-
+ //drag and drop
     const handleDragstart = (e) => {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", "");
@@ -372,7 +377,7 @@
       const newColumn = dragged.closest(".column");
       const taskId = dragged.dataset.taskId;
       const newColumnId = newColumn.dataset.columnId;
-  
+      // updates the move new column
       fetch(`/kanban/${PROJECT_ID}/move_task/`, {
         method: "POST",
         headers: {
@@ -382,8 +387,9 @@
         body: JSON.stringify({ task_id: taskId, new_column_id: newColumnId }),
       });
     };
-  
 
+    //actions when tasks is clicked
+  
     document.addEventListener("click", (e) => {
       const taskEl = e.target.closest(".task");
       if (!taskEl) return;
